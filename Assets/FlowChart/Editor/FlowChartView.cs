@@ -70,7 +70,6 @@ namespace JuicyFlowChart
             return GetNodeByGuid(nodeID.ToString()) as NodeView;
         }
 
-
         private void CreateNodeView(Node node)
         {
             NodeView nodeView = new NodeView(node, node.ID == _flowChart.RootID, () => EditorUtility.SetDirty(_flowChart));

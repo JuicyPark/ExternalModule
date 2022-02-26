@@ -18,6 +18,7 @@ namespace JuicyFlowChart
         public List<Node> Nodes { get => _nodes; internal set => _nodes = value; }
 
         private static Dictionary<string, Type> _nodeTypes = new Dictionary<string, Type>();
+
         public static Type GetNodeType(string namespaceType, string key)
         {
             Type type;
@@ -31,6 +32,13 @@ namespace JuicyFlowChart
                 type = Type.GetType(key);
                 _nodeTypes[key] = type;
             }
+
+            if(type == null)
+            {
+                Debug.LogError($"Invalid Type : <color=red>{key}</color>");
+                _nodeTypes.Remove(key);
+            }
+
             return type;
         }
 
@@ -110,7 +118,11 @@ namespace JuicyFlowChart
                 childrenID.ForEach((nodeID) =>
                 {
                     Node targetNode = _nodes.Find(x => x.ID == nodeID);
-                    Task targetTask = (Task)JsonUtility.FromJson(targetNode.Data, GetNodeType(targetNode.Namespace, targetNode.Name));
+                    Type targetType = GetNodeType(targetNode.Namespace, targetNode.Name);
+                    if(targetType == null)
+                        return;
+
+                    Task targetTask = (Task)JsonUtility.FromJson(targetNode.Data, targetType);
                     targetTask.NodeID = targetNode.ID;
                     targetTask.SetGameObject(gameObject);
 
