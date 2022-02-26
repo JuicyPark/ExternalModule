@@ -11,7 +11,6 @@ namespace JuicyFlowChart
         private Node _node;
         private Port input;
         private Port output;
-        private System.Action<Node> _onRootNodeSet;
         private System.Action _onNodeMove;
         private bool _isRoot;
 
@@ -20,13 +19,12 @@ namespace JuicyFlowChart
         public Port Output { get => output; }
         public System.Action<NodeView> OnNodeSelected { get; internal set; }
 
-        public NodeView(Node node, bool isRoot, System.Action<Node> OnRootNodeSet, System.Action OnNodeMove) : base(FlowChartEditorPath.nodeViewUxml)
+        public NodeView(Node node, bool isRoot, System.Action OnNodeMove) : base(FlowChartEditorPath.nodeViewUxml)
         {
             _node = node;
             _isRoot = isRoot;
             title = _node.Name;
             viewDataKey = _node.ID.ToString();
-            _onRootNodeSet = OnRootNodeSet;
             _onNodeMove = OnNodeMove;
 
             InitNodeStyle();
@@ -97,20 +95,6 @@ namespace JuicyFlowChart
             if (OnNodeSelected != null)
             {
                 OnNodeSelected.Invoke(this);
-            }
-        }
-
-        /// <summary>
-        /// 마우스 우클릭시 실행되는 콜백함수
-        /// </summary>
-        public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
-        {
-            if (!_isRoot && !Application.isPlaying)
-            {
-                evt.menu.AppendAction($"Set root", (a) =>
-                {
-                    _onRootNodeSet?.Invoke(_node);
-                });
             }
         }
 

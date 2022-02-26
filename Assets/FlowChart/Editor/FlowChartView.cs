@@ -73,15 +73,9 @@ namespace JuicyFlowChart
 
         private void CreateNodeView(Node node)
         {
-            NodeView nodeView = new NodeView(node, node.ID == _flowChart.RootID, SetRootNode, ()=> EditorUtility.SetDirty(_flowChart));
+            NodeView nodeView = new NodeView(node, node.ID == _flowChart.RootID, () => EditorUtility.SetDirty(_flowChart));
             nodeView.OnNodeSelected = OnNodeSelected;
             AddElement(nodeView);
-        }
-
-        private void SetRootNode(Node node)
-        {
-            _flowChart.SetRootNode(node);
-            ShowView(_flowChart);
         }
 
         /// <summary>
@@ -89,7 +83,7 @@ namespace JuicyFlowChart
         /// </summary>
         private GraphViewChange OnGraphViewChanged(GraphViewChange graphViewChange)
         {
-           if (_flowChart == null || Application.isPlaying)
+            if (_flowChart == null || Application.isPlaying)
                 return graphViewChange;
 
             // Delete Node
@@ -149,10 +143,17 @@ namespace JuicyFlowChart
             var types = TypeCache.GetTypesDerivedFrom<T>();
             foreach (var type in types)
             {
-                evt.menu.AppendAction($"Create {type.BaseType.Name}/{type.Name}", (actionEvent) =>
+                evt.menu.AppendAction($"Create {type.BaseType.Name}/{type.Namespace} {type.Name}", (actionEvent) =>
                 {
-                    Node node = _flowChart.CreateNode(type.Name, type.BaseType.Name, worldMousePosition);
+                    Node node = _flowChart.CreateNode(type.Name, type.Namespace, type.BaseType.Name, worldMousePosition);
                     CreateNodeView(node);
+
+                    if (_flowChart.RootID == 0)
+                    {
+                        Node root = _flowChart.CreateRootNode(node);
+                        CreateNodeView(root);
+                        DrawEdge();
+                    }
                 });
             }
         }

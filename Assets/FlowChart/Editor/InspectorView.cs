@@ -21,8 +21,9 @@ namespace JuicyFlowChart
         {
             Clear();
             _node = nodeView.Node;
+
             _flowChart = flowChart;
-            _type = FlowChart.GetNodeType(_node.Name);
+            _type = FlowChart.GetNodeType(_node.Namespace, _node.Name);
             _selectedInstance = JsonUtility.FromJson(_node.Data, _type);
             _fields = _type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 

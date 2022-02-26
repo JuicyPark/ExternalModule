@@ -10,6 +10,8 @@ namespace JuicyFlowChart
         [HideInInspector]
         public string Name;
         [HideInInspector]
+        public string Namespace;
+        [HideInInspector]
         public string BaseType;
         [HideInInspector]
         public int ID;

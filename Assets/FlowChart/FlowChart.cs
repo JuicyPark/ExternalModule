@@ -8,20 +8,24 @@ namespace JuicyFlowChart
     [CreateAssetMenu()]
     public class FlowChart : ScriptableObject
     {
-        [HideInInspector]
-        [SerializeField]
+        [HideInInspector, SerializeField]
         private int _rootID;
-        [HideInInspector]
-        [SerializeField]
+
+        [HideInInspector, SerializeField]
         private List<Node> _nodes = new List<Node>();
 
         public int RootID { get => _rootID; internal set => _rootID = value; }
         public List<Node> Nodes { get => _nodes; internal set => _nodes = value; }
 
         private static Dictionary<string, Type> _nodeTypes = new Dictionary<string, Type>();
-        public static Type GetNodeType(string key)
+        public static Type GetNodeType(string namespaceType, string key)
         {
             Type type;
+            if (!string.IsNullOrEmpty(namespaceType))
+            {
+                key = $"{namespaceType}.{key}";
+            }
+
             if (!_nodeTypes.TryGetValue(key, out type))
             {
                 type = Type.GetType(key);
@@ -30,47 +34,38 @@ namespace JuicyFlowChart
             return type;
         }
 
-        public Node CreateNode(string type, string baseType, Vector2 position)
+        public Node CreateNode(string type, string namespaceType, string baseType, Vector2 position)
         {
             Node node = new Node();
             node.Name = type;
-
+            node.Namespace = namespaceType;
             node.BaseType = baseType;
             node.ID = GUID.Generate().GetHashCode();
             node.Position = position;
-            if (_rootID == 0)
-            {
-                SetRootNode(node);
-            }
 
-            var instance = Activator.CreateInstance(FlowChart.GetNodeType(type));
+            var instance = Activator.CreateInstance(FlowChart.GetNodeType(namespaceType, type));
             node.Data = JsonUtility.ToJson(instance);
-
             _nodes.Add(node);
             EditorUtility.SetDirty(this);
             return node;
         }
 
-        public void SetRootNode(Node target)
+        public Node CreateRootNode(Node childNode)
         {
-            if (_rootID == 0)
-            {
-                _nodes.ForEach((node) =>
-                {
-                    if (node.ChildrenID.Contains(target.ID))
-                    {
-                        _nodes.Remove(target);
-                    }
-                });
-            }
-            else
-            {
-                Node rootNode = _nodes.Find(x => x.ID == _rootID);
-                rootNode.ChildrenID.Clear();
-            }
+            Node root = new Node();
+            root.Name = "Root";
+            root.Namespace = "JuicyFlowChart";
+            root.BaseType = root.Name;
+            root.ID = GUID.Generate().GetHashCode();
+            root.Position = childNode.Position + new Vector2(0, -150f);
+            AddChild(root, childNode);
 
-            _rootID = target.ID;
+            var instance = Activator.CreateInstance(FlowChart.GetNodeType("JuicyFlowChart", "Root"));
+            root.Data = JsonUtility.ToJson(instance);
+            _rootID = root.ID;
+            _nodes.Add(root);
             EditorUtility.SetDirty(this);
+            return root;
         }
 
         public void DeleteNode(Node node)
@@ -100,7 +95,7 @@ namespace JuicyFlowChart
         public Task Clone(GameObject gameObject)
         {
             Node rootNode = _nodes.Find(x => x.ID == _rootID);
-            Task rootTask = (Task)JsonUtility.FromJson(rootNode.Data, GetNodeType(rootNode.Name));
+            Task rootTask = (Task)JsonUtility.FromJson(rootNode.Data, GetNodeType(rootNode.Namespace, rootNode.Name));
             rootTask.SetGameObject(gameObject);
             rootTask.NodeID = rootNode.ID;
             Traverse(rootNode, rootTask, gameObject);
@@ -115,7 +110,7 @@ namespace JuicyFlowChart
                 childrenID.ForEach((nodeID) =>
                 {
                     Node targetNode = _nodes.Find(x => x.ID == nodeID);
-                    Task targetTask = (Task)JsonUtility.FromJson(targetNode.Data, GetNodeType(targetNode.Name));
+                    Task targetTask = (Task)JsonUtility.FromJson(targetNode.Data, GetNodeType(targetNode.Namespace, targetNode.Name));
                     targetTask.NodeID = targetNode.ID;
                     targetTask.SetGameObject(gameObject);
 
