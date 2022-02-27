@@ -168,7 +168,7 @@ namespace JuicyFlowChart
 
         private void ConnectTaskToNode(Task rootTask)
         {
-            if (_flowChart.RootID == 0)
+            if (_flowChart.RootID == 0 || rootTask == null)
                 return;
 
             Node rootNode = _flowChart.Nodes.Find(x => x.ID == _flowChart.RootID);
