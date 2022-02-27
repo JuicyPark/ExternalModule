@@ -128,7 +128,6 @@ namespace JuicyFlowChart
             {
                 _flowChart = selectedFlowChart;
                 _selectedName = _flowChart.name;
-                ConnectTaskToNode(null);
             }
 
             // Show FlowChart
@@ -186,14 +185,7 @@ namespace JuicyFlowChart
                 {
                     Node targetNode = _flowChart.Nodes.Find(x => x.ID == nodeID);
                     Task targetTask;
-                    if (task == null)
-                    {
-                        targetTask = null;
-                    }
-                    else
-                    {
-                        targetTask = task.Children.Find(x => x.NodeID == targetNode.ID);
-                    }
+                    targetTask = task.Children.Find(x => x.NodeID == targetNode.ID);
                     targetNode.Task = targetTask;
                     Traverse(targetNode, targetTask);
                 });
