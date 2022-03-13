@@ -77,9 +77,6 @@ namespace JuicyFlowChart
             AddElement(nodeView);
         }
 
-        /// <summary>
-        /// 그래프 뷰 내에서 특정 이벤트(삭제, 엣지생성, 노드이동 등)가 발생했을 경우 실행되는 콜백함수
-        /// </summary>
         private GraphViewChange OnGraphViewChanged(GraphViewChange graphViewChange)
         {
             if (_flowChart == null || Application.isPlaying)
@@ -116,12 +113,33 @@ namespace JuicyFlowChart
                     _flowChart.AddChild(parentView.Node, childView.Node);
                 });
             }
+
+            if(graphViewChange.movedElements != null)
+            {
+                graphViewChange.movedElements.ForEach((node) =>
+                {
+                    NodeView nodeView = node as NodeView;
+                    if (nodeView.Input != null && nodeView.Input.connections != null)
+                    {
+                        foreach (var parentEdge in nodeView.Input.connections)
+                        {
+                            if (parentEdge == null)
+                                break;
+
+                            var parent = parentEdge.output.node as NodeView;
+                            parent.Node.ChildrenID.Sort(SortByHoriziontalPosition);
+                        }
+                    }
+                });
+            }
             return graphViewChange;
         }
 
-        /// <summary>
-        /// 마우스 우클릭시 실행되는 콜백함수
-        /// </summary>
+        private int SortByHoriziontalPosition(int left, int right)
+        {
+            return FindNodeView(left).Node.Position.x < FindNodeView(right).Node.Position.x ? -1 : 1;
+        }
+
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
         {
             if (_flowChart == null || Application.isPlaying)
@@ -157,9 +175,6 @@ namespace JuicyFlowChart
             }
         }
 
-        /// <summary>
-        /// Edge 생성시 Edge를 붙힐 수 있는 가능한 Port List를 반환해주는 함수
-        /// </summary>
         public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
         {
             if (Application.isPlaying)

@@ -104,9 +104,6 @@ namespace JuicyFlowChart
             _saveButton.style.backgroundColor = Color.gray;
         }
 
-        /// <summary>
-        /// Unity Asset선택시 실행되는 콜백함수
-        /// </summary>
         private void OnSelectionChange()
         {
             // Select FlowChart
