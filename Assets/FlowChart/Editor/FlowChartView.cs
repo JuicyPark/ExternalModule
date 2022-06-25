@@ -145,12 +145,16 @@ namespace JuicyFlowChart
             if (_flowChart == null || Application.isPlaying)
                 return;
 
+            ShowSpecialNodeType<Sequencer>(evt);
+            ShowSpecialNodeType<RandomSelector>(evt);
+            ShowSpecialNodeType<Restarter>(evt);
             evt.menu.AppendSeparator();
             ShowNodeTypes<Action>(evt);
             ShowNodeTypes<Condition>(evt);
+            // TODO : Coroutine Action Type
         }
 
-        private void ShowNodeTypes<T>(ContextualMenuPopulateEvent evt) where T : Task
+        private void ShowNodeTypes<T>(ContextualMenuPopulateEvent evt) where T : Flow
         {
             VisualElement contentViewContainer = ElementAt(1);
             Vector3 screenMousePosition = evt.localMousePosition;
@@ -173,6 +177,29 @@ namespace JuicyFlowChart
                     }
                 });
             }
+        }
+
+        private void ShowSpecialNodeType<T>(ContextualMenuPopulateEvent evt) where T : Flow
+        {
+            VisualElement contentViewContainer = ElementAt(1);
+            Vector3 screenMousePosition = evt.localMousePosition;
+            Vector2 worldMousePosition = screenMousePosition - contentViewContainer.transform.position;
+            worldMousePosition *= 1 / contentViewContainer.transform.scale.x;
+
+            Type type = typeof(T);
+
+            evt.menu.AppendAction($"Create {type}", (actionEvent) =>
+            {
+                Node node = _flowChart.CreateNode(type.ToString(), type.Namespace, type.BaseType.Name, worldMousePosition);
+                CreateNodeView(node);
+
+                if (_flowChart.RootID == 0)
+                {
+                    Node root = _flowChart.CreateRootNode(node);
+                    CreateNodeView(root);
+                    DrawEdge();
+                }
+            });
         }
 
         public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)

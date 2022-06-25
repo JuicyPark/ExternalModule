@@ -58,6 +58,18 @@
     background-color: rgb(83, 134, 228);
 }
 
+.Sequencer #input {
+    background-color: rgb(254, 185, 95);
+}
+
+.RandomSelector #input {
+    background-color: rgb(0, 175, 84);
+}
+
+.Restarter #input {
+    background-color: rgb(12, 12, 12);
+}
+
 .root #input {
     background-color: rgb(255, 255, 255);
     min-height: 20px;

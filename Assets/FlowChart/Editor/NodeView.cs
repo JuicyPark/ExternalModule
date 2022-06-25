@@ -31,7 +31,8 @@ namespace JuicyFlowChart
 
             if (!_isRoot)
                 CreateInputPorts();
-            CreateOutputPorts();
+            if(_node.Name != "Restarter")
+                CreateOutputPorts();
             SetupClasses();
         }
 
@@ -77,6 +78,18 @@ namespace JuicyFlowChart
             {
                 AddToClassList("condition");
             }
+            else if (_node.Name == "Sequencer")
+            {
+                AddToClassList("Sequencer");
+            }
+            else if (_node.Name == "RandomSelector")
+            {
+                AddToClassList("RandomSelector");
+            }
+            else if (_node.Name == "Restarter")
+            {
+                AddToClassList("Restarter");
+            }
         }
 
         public override void SetPosition(Rect newPos)
@@ -100,7 +113,7 @@ namespace JuicyFlowChart
 
         internal void UpdateState()
         {
-            if (_node.Task == null)
+            if (_node.Flow == null)
                 return;
 
             RemoveFromClassList("enable");
@@ -108,12 +121,12 @@ namespace JuicyFlowChart
 
             if (Application.isPlaying)
             {
-                switch (_node.Task.CurrentState)
+                switch (_node.Flow.CurrentState)
                 {
-                    case Task.State.Enable:
+                    case Flow.State.Enable:
                         AddToClassList("enable");
                         break;
-                    case Task.State.Disable:
+                    case Flow.State.Disable:
                         AddToClassList("disable");
                         break;
                 }

@@ -163,17 +163,17 @@ namespace JuicyFlowChart
             }
         }
 
-        private void ConnectTaskToNode(Task rootTask)
+        private void ConnectTaskToNode(Flow rootFlow)
         {
-            if (_flowChart.RootID == 0 || rootTask == null)
+            if (_flowChart.RootID == 0 || rootFlow == null)
                 return;
 
             Node rootNode = _flowChart.Nodes.Find(x => x.ID == _flowChart.RootID);
-            rootNode.Task = rootTask;
-            Traverse(rootNode, rootTask);
+            rootNode.Flow = rootFlow;
+            RecursiveConntectNode(rootNode, rootFlow);
         }
 
-        public void Traverse(Node node, Task task)
+        public void RecursiveConntectNode(Node node, Flow flow)
         {
             if (node != null)
             {
@@ -181,10 +181,10 @@ namespace JuicyFlowChart
                 childrenID.ForEach((nodeID) =>
                 {
                     Node targetNode = _flowChart.Nodes.Find(x => x.ID == nodeID);
-                    Task targetTask;
-                    targetTask = task.Children.Find(x => x.NodeID == targetNode.ID);
-                    targetNode.Task = targetTask;
-                    Traverse(targetNode, targetTask);
+                    Flow targetFlow;
+                    targetFlow = flow.Children.Find(x => x.NodeID == targetNode.ID);
+                    targetNode.Flow = targetFlow;
+                    RecursiveConntectNode(targetNode, targetFlow);
                 });
             }
         }

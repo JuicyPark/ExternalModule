@@ -6,10 +6,10 @@ namespace JuicyFlowChart
     {
         [SerializeField]
         private FlowChart _flowChart;
-        private Task _root;
+        private Flow _root;
 
         public FlowChart FlowChart { get => _flowChart; }
-        public Task Root { get => _root; }
+        public Flow Root { get => _root; }
 
         private void Start()
         {
@@ -28,6 +28,11 @@ namespace JuicyFlowChart
                 return;
 
             _root.Tick();
+        }
+
+        public void Stop()
+        {
+            _root.ChangeToDisableState();
         }
     }
 }

@@ -3,31 +3,35 @@ using UnityEngine;
 
 namespace JuicyFlowChart
 {
-    public abstract class Condition : Task
+    public abstract class Condition : Flow
     {
         protected abstract bool Check();
 
-        public sealed override void Tick()
+        public sealed override State Tick()
         {
             if (Check())
             {
                 _state = State.Enable;
-                foreach (Task child in Children)
+                State childState = State.Disable;
+                foreach (Flow child in Children)
                 {
-                    child.Tick();
+                    childState = child.Tick();
                 }
+                return childState;
             }
             else
             {
                 if (_state == State.Enable)
                 {
                     _state = State.Disable;
-                    foreach (Task child in Children)
+                    foreach (Flow child in Children)
                     {
                         child.ChangeToDisableState();
                     }
                 }
             }
+
+            return _state;
         }
     }
 }

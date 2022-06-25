@@ -21,6 +21,6 @@ namespace JuicyFlowChart
         public Vector2 Position;
         [HideInInspector]
         public List<int> ChildrenID = new List<int>();
-        public Task Task;
+        public Flow Flow;
     }
 }

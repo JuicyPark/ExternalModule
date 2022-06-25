@@ -100,17 +100,17 @@ namespace JuicyFlowChart
         }
 
         #region Runtime
-        public Task Clone(GameObject gameObject)
+        public Flow Clone(GameObject gameObject)
         {
             Node rootNode = _nodes.Find(x => x.ID == _rootID);
-            Task rootTask = (Task)JsonUtility.FromJson(rootNode.Data, GetNodeType(rootNode.Namespace, rootNode.Name));
+            Flow rootTask = (Flow)JsonUtility.FromJson(rootNode.Data, GetNodeType(rootNode.Namespace, rootNode.Name));
             rootTask.SetGameObject(gameObject);
             rootTask.NodeID = rootNode.ID;
-            Traverse(rootNode, rootTask, gameObject);
+            RecursiveCreateFlow(rootNode, rootTask, gameObject);
             return rootTask;
         }
 
-        public void Traverse(Node node, Task task, GameObject gameObject)
+        public void RecursiveCreateFlow(Node node, Flow flow, GameObject gameObject)
         {
             if (node != null)
             {
@@ -122,12 +122,12 @@ namespace JuicyFlowChart
                     if(targetType == null)
                         return;
 
-                    Task targetTask = (Task)JsonUtility.FromJson(targetNode.Data, targetType);
+                    Flow targetTask = (Flow)JsonUtility.FromJson(targetNode.Data, targetType);
                     targetTask.NodeID = targetNode.ID;
                     targetTask.SetGameObject(gameObject);
 
-                    task.Children.Add(targetTask);
-                    Traverse(targetNode, targetTask, gameObject);
+                    flow.Children.Add(targetTask);
+                    RecursiveCreateFlow(targetNode, targetTask, gameObject);
                 });
             }
         }
