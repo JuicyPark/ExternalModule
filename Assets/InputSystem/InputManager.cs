@@ -28,7 +28,7 @@ namespace InputSystem
         private InputSetting _inputSetting;
 
         public Dictionary<KeyName, KeyInput> KeyInputs { get; private set; }
-        public MouseInput MouseInput { get; private set; }
+        public Dictionary<AxisKeyName, AxisKeyInput> AxisKeyInputs { get; private set; }
 
         private void Awake()
         {
@@ -39,7 +39,6 @@ namespace InputSystem
                 return;
             }
             BindKey();
-            MouseInput = new MouseInput(); 
         }
 
         private void BindKey()
@@ -48,21 +47,15 @@ namespace InputSystem
             foreach (var keyButton in _inputSetting.Key)
             {
                 KeyName name = EnumMapper.GetEnumType<KeyName>(keyButton.Name);
-                KeyCode code = GetUserSettingKeyCode(name);
-                if (code == KeyCode.None)
-                    code = keyButton.Code;
-
-                KeyInputs[name] = new KeyInput(code);
+                KeyInputs[name] = new KeyInput(keyButton.Code);
             }
-        }
 
-        private KeyCode GetUserSettingKeyCode(KeyName keyName)
-        {
-            string userSettingKey = PlayerPrefs.GetString(keyName.ToString());
-            if (string.IsNullOrEmpty(userSettingKey))
-                return KeyCode.None;
-            else
-                return EnumMapper.GetEnumType<KeyCode>(userSettingKey);
+            AxisKeyInputs = new Dictionary<AxisKeyName, AxisKeyInput>();
+            foreach (var keyButton in _inputSetting.AxisKey)
+            {
+                AxisKeyName name = EnumMapper.GetEnumType<AxisKeyName>(keyButton.Name);
+                AxisKeyInputs[name] = new AxisKeyInput(keyButton.PostiveCode, keyButton.NegativeCode);
+            }
         }
 
         private void Update()
@@ -73,30 +66,32 @@ namespace InputSystem
                 key.IsKeyDown = Input.GetKeyDown(key.Code);
                 key.IsKeyUp = Input.GetKeyUp(key.Code);
             }
-            MouseInput.Run();
+
+            foreach (var axisKey in AxisKeyInputs.Values)
+            {
+                if(Input.GetKey(axisKey.NegativeCode) && !Input.GetKey(axisKey.PostiveCode))
+                {
+                    axisKey.Value = -1;
+                }
+                else if(!Input.GetKey(axisKey.NegativeCode) && Input.GetKey(axisKey.PostiveCode))
+                {
+                    axisKey.Value = 1;
+                }
+                else
+                {
+                    axisKey.Value = 0;
+                }
+            }
         }
 
         public KeyInput GetKey(KeyName name)
         {
             return KeyInputs[name];
         }
-
-        public void ChangeKey(KeyName targetKey, KeyCode changeKeyCode)
+        
+        public float GetAxisKey(AxisKeyName name)
         {
-            KeyInputs[targetKey].Code = changeKeyCode;
-            PlayerPrefs.SetString(targetKey.ToString(), changeKeyCode.ToString());
-        }
-
-        // KEY TEST 용도입니다 //
-        private void OnGUI()
-        {
-            int height = 0;
-            foreach (var key in KeyInputs)
-            {
-                GUI.Label(new Rect(100, 40 + height, 80, 20), key.Key.ToString());
-                GUI.Label(new Rect(20, 40 + height, 80, 20), key.Value.Code.ToString());
-                height += 20;
-            }
+            return AxisKeyInputs[name].Value;
         }
     }
 }

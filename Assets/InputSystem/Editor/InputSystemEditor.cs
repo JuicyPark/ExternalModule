@@ -101,7 +101,9 @@ namespace InputSystem
                 return;
 
             SerializedProperty keyButtonProperty = _serializedObject.FindProperty("_key");
+            SerializedProperty axisKeyButtonProperty = _serializedObject.FindProperty("_axisKey");
             EditorGUILayout.PropertyField(keyButtonProperty, true);
+            EditorGUILayout.PropertyField(axisKeyButtonProperty, true);
             _serializedObject.ApplyModifiedProperties();
         }
 
@@ -113,12 +115,12 @@ namespace InputSystem
             GUI.color = Color.cyan;
             if (GUILayout.Button("Apply Input System", GUILayout.Width(_buttonsSize)))
             {
-                CreateEnumClass(_inputSetting.Key);
+                CreateEnumClass(_inputSetting.Key, _inputSetting.AxisKey);
                 AssetDatabase.SaveAssets();
             }
         }
 
-        public void CreateEnumClass(List<Key> inputButtons)
+        public void CreateEnumClass(List<Key> inputButtons, List<AxisKey> inputAxisButtons)
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("// Input System에 의해서 자동으로 생성되는 Enum입니다.");
@@ -141,6 +143,19 @@ namespace InputSystem
                 }
                 sb.AppendLine("    }");
             }
+            sb.AppendLine();
+
+            if (inputAxisButtons.Count > 0)
+            {
+                sb.AppendLine("    public enum AxisKeyName");
+                sb.AppendLine("    {");
+                foreach (AxisKey axisButton in inputAxisButtons)
+                {
+                    sb.AppendLine($"        {axisButton.Name},");
+                }
+                sb.AppendLine("    }");
+            }
+
             sb.AppendLine("}");
             string path = Application.dataPath + "/InputSystem/InputNames.cs";
             File.WriteAllText(path, sb.ToString());

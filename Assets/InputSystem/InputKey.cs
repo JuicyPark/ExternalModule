@@ -14,4 +14,18 @@ namespace InputSystem
             Code = code;
         }
     }
+
+    public class AxisKeyInput
+    {
+        public float Value { get; set; }
+
+        public KeyCode PostiveCode;
+        public KeyCode NegativeCode;
+
+        public AxisKeyInput(KeyCode postive, KeyCode negative)
+        {
+            PostiveCode = postive;
+            NegativeCode = negative;
+        }
+    }
 }
